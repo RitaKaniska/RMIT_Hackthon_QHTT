@@ -1,0 +1,13 @@
+services:
+  tidecloak:
+    image: tideorg/tidecloak-dev:latest
+    container_name: embargo-tidecloak
+    ports:
+      - "127.0.0.1:8080:8080"
+    environment:
+      # Development-only bootstrap admin; the port is bound to loopback.
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${TIDECLOAK_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${TIDECLOAK_ADMIN_PASSWORD:-password}
+    volumes:
+      - ./tidecloak-db:/opt/keycloak/data/h2
+    restart: "no"

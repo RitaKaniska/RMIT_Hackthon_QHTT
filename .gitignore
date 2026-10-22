@@ -1,0 +1,27 @@
+node_modules/
+dist/
+config/tidecloak.json
+config/adapter.json
+.env
+.env.*
+!.env.example
+data/
+tidecloak-data/
+coverage/
+.vite/
+tmp/
+temp/
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.db
+*.db-*
+*.log
+npm-debug.log*
+.DS_Store
+
+# Tide provisioning artefacts
+scripts/.realm_name
+scripts/tide-invites.txt
+!config/.gitkeep
+tidecloak-db/
