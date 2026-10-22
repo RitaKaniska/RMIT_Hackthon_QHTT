@@ -61,9 +61,9 @@ export function PublicConfigSummary({ config }) {
 export default function SetupView({
   setup,
   identity,
-  onRefresh,
-  refreshing,
-  refreshError,
+  onRefreshSetup: onRefresh,
+  refreshingSetup: refreshing,
+  refreshSetupError: refreshError,
 }) {
   const checks = Array.isArray(setup?.checks) ? setup.checks : [];
   const ready = checks.filter((check) => check.status === "ready").length;

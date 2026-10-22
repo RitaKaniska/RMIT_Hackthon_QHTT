@@ -5,6 +5,7 @@ import App from "./App.jsx";
 import { fetchSetup } from "./lib/api.js";
 import SetupScreen, { BootScreen, SetupLoadError } from "./views/SetupScreen.jsx";
 import "./style.css";
+import "./workspace.css";
 
 function hasUsableServerConfig(config) {
   return Boolean(

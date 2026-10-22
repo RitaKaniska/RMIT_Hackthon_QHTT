@@ -3,11 +3,10 @@ import { useTideCloak } from "@tidecloak/react";
 import { VENDORS } from "../shared/contracts.mjs";
 import {
   ErrorPanel,
-  Notice,
   RoleChips,
   Spinner,
 } from "./components/ui.jsx";
-import { SetupChecks } from "./views/SetupView.jsx";
+import Landing from "./views/Landing.jsx";
 import { navigate, useApi, useRoute } from "./lib/hooks.js";
 import { claimRoles, formatDurationSeconds } from "./lib/util.js";
 import Overview from "./views/Overview.jsx";
@@ -205,150 +204,6 @@ function PublicBrand() {
   );
 }
 
-function Landing({ setup, sdk }) {
-  const [loginError, setLoginError] = useState(null);
-  const [starting, setStarting] = useState(false);
-  const checks = Array.isArray(setup?.checks) ? setup.checks : [];
-
-  async function startLogin() {
-    setStarting(true);
-    setLoginError(null);
-    try {
-      await sdk.login();
-    } catch (error) {
-      setLoginError(error);
-    } finally {
-      setStarting(false);
-    }
-  }
-
-  return (
-    <div className="landing-shell">
-      <header className="landing-top">
-        <PublicBrand />
-        <div className="top-actions">
-          <span className="pill pill-positive">Public adapter loaded</span>
-          <a className="btn btn-ghost" href="/api/setup" target="_blank" rel="noreferrer noopener">
-            /api/setup
-          </a>
-        </div>
-      </header>
-
-      <main id="main" className="landing-main">
-        <section className="landing-hero">
-          <div>
-            <span className="eyebrow">RESEARCHER → VENDOR</span>
-            <h1>Confidential reports move through the exchange without becoming readable to it.</h1>
-            <p>
-              The browser encrypts the full report under a signed, record-specific Tide policy. The
-              exchange stores ciphertext and routing metadata. The selected vendor decrypts with a
-              matching read grant; the storage operator cannot read the finding through this app.
-            </p>
-            <div className="landing-actions">
-              <button className="btn btn-primary" type="button" onClick={startLogin} disabled={starting || sdk.isLoading}>
-                {starting || sdk.isLoading ? "Opening TideCloak…" : "Log in with TideCloak"}
-              </button>
-              <span className="field-hint">
-                Roles come from the signed-in token. There is no local persona switcher.
-              </span>
-            </div>
-          </div>
-
-          <aside className="login-card">
-            <span className="eyebrow">REAL SESSION REQUIRED</span>
-            <h2>Sign in to continue</h2>
-            <p>
-              The provider is mounted with the public adapter returned by <code>GET /api/setup</code>.
-              Redirect handling is at <code>/auth/redirect</code>; the committed silent-SSO helper is
-              at <code>/silent-check-sso.html</code>.
-            </p>
-            {sdk.initError ? (
-              <ErrorPanel
-                error={sdk.initError}
-                title="TideCloak initialization failed"
-                onRetry={() => sdk.reload()}
-                retryLabel="Reload provider"
-              />
-            ) : null}
-            {loginError ? (
-              <ErrorPanel error={loginError} title="Login could not start" />
-            ) : null}
-            {sdk.sessionExpired && !sdk.authenticated ? (
-              <Notice tone="info" title="No active session">
-                Sign in with TideCloak to create a real session. No local fallback session will be
-                created.
-              </Notice>
-            ) : null}
-            <dl className="meta-grid">
-              <div>
-                <dt>Browser origin</dt>
-                <dd className="mono">{setup?.appOrigin || "not reported"}</dd>
-              </div>
-              <div>
-                <dt>API audience</dt>
-                <dd className="mono">{setup?.apiAudience || "not reported"}</dd>
-              </div>
-              <div className="span-all">
-                <dt>Realm issuer</dt>
-                <dd className="mono">{setup?.realmIssuer || "not reported"}</dd>
-              </div>
-            </dl>
-          </aside>
-        </section>
-
-        <div className="grid grid-3">
-          <article className="panel">
-            <span className="eyebrow">RESEARCHER</span>
-            <h2>Author a draft</h2>
-            <p>
-              Create a vendor-specific revision, wait for both record grants, then encrypt title,
-              severity, details and PoC in the browser.
-            </p>
-          </article>
-          <article className="panel">
-            <span className="eyebrow">VENDOR</span>
-            <h2>Decrypt and triage</h2>
-            <p>
-              A matching vendor role lists routed reports. Decryption uses the stored read policy and
-              rejects mismatched context after decrypt.
-            </p>
-          </article>
-          <article className="panel">
-            <span className="eyebrow">OPERATOR / ADMIN</span>
-            <h2>Keep the boundary honest</h2>
-            <p>
-              The operator sees ciphertext and metadata. Admins sign exact policies in the Tide
-              enclave; the interface never fabricates a quorum.
-            </p>
-          </article>
-        </div>
-
-        <section className="panel">
-          <div className="panel-heading">
-            <div>
-              <span className="eyebrow">SETUP CHECKS</span>
-              <h2>Before signing in</h2>
-            </div>
-            <span className="pill pill-neutral">
-              {checks.filter((check) => check.status === "ready").length}/{checks.length} ready
-            </span>
-          </div>
-          <SetupChecks checks={checks} />
-          <p className="field-hint">
-            A successful config read is not proof of login, signing or decryption. Those remain
-            separate runtime evidence states.
-          </p>
-        </section>
-
-        <p className="view-footnote">
-          Synthetic report content only. No telemetry, no plaintext persistence and no local role
-          management.
-        </p>
-      </main>
-    </div>
-  );
-}
-
 function AccessDenied({ page, identity }) {
   return (
     <section className="panel" role="alert">
@@ -389,8 +244,8 @@ function NotFound({ path }) {
 function AppFooter() {
   return (
     <footer className="app-footer">
-      <span>Embargo prototype · real TideCloak SDK calls only</span>
-      <span>Synthetic report content · local activity is not tamper-proof</span>
+      <span>Embargo / Confidential disclosure</span>
+      <span>Prototype for synthetic findings. Local activity is not tamper-proof.</span>
     </footer>
   );
 }

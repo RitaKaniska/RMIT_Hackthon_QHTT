@@ -1,5 +1,6 @@
 import { ErrorPanel, Notice, Spinner } from "../components/ui.jsx";
 import { SetupChecks } from "./SetupView.jsx";
+import DisclosureScene from "../components/DisclosureScene.jsx";
 
 function PublicBrand() {
   return (
@@ -77,20 +78,24 @@ export default function SetupScreen({
       <PublicBrand />
       <main id="main" className="public-main">
         <section className="public-hero">
-          <span className="eyebrow light">TIDECLOAK REALM NOT CONFIGURED</span>
-          <h1>The exchange is not pretending to be signed in.</h1>
-          <p>
-            The API is healthy enough to answer setup, but it has no valid public adapter to give the
-            browser. There is deliberately no fake login, local role switch or encryption fallback.
-            Finish the real realm configuration and re-check.
-          </p>
-          <div className="hero-actions">
-            <button className="btn btn-light" type="button" onClick={onRefresh} disabled={refreshing}>
-              {refreshing ? "Re-checking…" : "Re-check setup"}
-            </button>
-            <a className="btn btn-outline-light" href="/api/setup" target="_blank" rel="noreferrer noopener">
-              Read /api/setup
-            </a>
+          <div className="setup-intro">
+            <div>
+              <span className="channel-label">Your private disclosure channel</span>
+              <h1>Connect your disclosure workspace.</h1>
+              <p>
+                Finish the TideCloak configuration to enable sign-in and encrypted reports.
+                The checks below show what still needs attention.
+              </p>
+              <div className="hero-actions">
+                <button className="btn btn-light" type="button" onClick={onRefresh} disabled={refreshing}>
+                  {refreshing ? "Re-checking…" : "Re-check setup"}
+                </button>
+                <a className="btn btn-outline-light" href="/api/setup" target="_blank" rel="noreferrer noopener">
+                  Read /api/setup
+                </a>
+              </div>
+            </div>
+            <DisclosureScene />
           </div>
         </section>
 
@@ -137,7 +142,7 @@ export default function SetupScreen({
 
           <section className="panel">
             <span className="eyebrow">SETUP PATH</span>
-            <h2>Make the environment real</h2>
+            <h2>Connect TideCloak</h2>
             <ol className="setup-steps">
               <li>
                 <strong>Run TideCloak</strong>
