@@ -25,3 +25,5 @@ scripts/.realm_name
 scripts/tide-invites.txt
 !config/.gitkeep
 tidecloak-db/
+
+.playwright-mcp/

@@ -30,6 +30,32 @@ const PRIVATE_TOP_LEVEL = [
   "refreshToken",
 ];
 
+// Public realm key material the Tide SDK needs to start a session with the
+// ORKs. Without these the ORKs reject TidecloakSessionStartTokenSign.
+const PUBLIC_TIDE_FIELDS = [
+  "gVRKCertificate",
+  "gVVK",
+  "obfGVVK",
+  "vvkId",
+  "payerPublic",
+  "orkUrl",
+  "thresholdN",
+  "thresholdT",
+  "backgroundUrl",
+  "logoUrl",
+];
+
+function pickPublicTideFields(adapter) {
+  const picked = {};
+  for (const key of PUBLIC_TIDE_FIELDS) {
+    const value = adapter[key];
+    if (typeof value === "string" || (typeof value === "number" && Number.isFinite(value))) {
+      picked[key] = value;
+    }
+  }
+  return picked;
+}
+
 function check(id, label, status, detail = "") {
   return { id, label, status, detail };
 }
@@ -204,6 +230,7 @@ export function loadConfig(env = process.env) {
     vendorId: values.vendorId,
     homeOrkUrl: values.homeOrkUrl,
     ...(typeof adapter.scope === "string" && adapter.scope ? { scope: adapter.scope } : {}),
+    ...pickPublicTideFields(adapter),
     [originAuthKey]: originAuth,
     jwk: publicJwkSet,
   };

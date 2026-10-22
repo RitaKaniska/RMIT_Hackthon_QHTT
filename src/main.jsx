@@ -91,7 +91,7 @@ function Root() {
   }
 
   return (
-    <TideCloakContextProvider config={config}>
+    <TideCloakContextProvider config={{ ...config, useDPoP: { mode: "strict", alg: "ES256" } }}>
       <App
         setup={setup}
         onRefreshSetup={refresh}

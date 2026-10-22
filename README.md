@@ -1,16 +1,40 @@
+[![Built with TideCloak](https://tide.org/badges/built-with-tidecloak.svg)](https://tide.org/tidecloak?utm_source=github&utm_medium=readme&utm_campaign=unlocked)
+
 # Embargo
 
-Confidential researcher-to-vendor disclosure exchange. A researcher encrypts a
-report in the browser with a signed Tide relationship policy; the API stores
-ciphertext, routing metadata and the signed grants. The storage operator can see
-that a report exists, its vendor and its status, but not its title, severity,
-details or proof of concept.
+## Project overview
 
-This repository is a runnable implementation, not a certification. The Tide
-network, a real realm and enrolled accounts were **not** available while it was
-built. Nothing below should be read as evidence that a live ORK accepted a policy,
-that a vendor decrypted a report, or that a lone administrator is cryptographically
-prevented from issuing a replacement policy. Those gates require the setup in
+_A bug-disclosure exchange where a researcher's report is encrypted in the browser, so the exchange that stores it, and any lone admin, cannot read it._
+
+Built with [TideCloak](https://tide.org/tidecloak?utm_source=github&utm_medium=readme&utm_campaign=unlocked). Demo video: [`demo.mp4`](demo.mp4).
+
+### 1. Vision & originality
+
+A neutral middleman for vulnerability disclosure that never holds the secrets it routes. The exchange coordinates delivery and status, but cannot read a report's title, severity, details or proof of concept.
+
+### 2. Trust constraint insight
+
+Researchers must trust disclosure platforms with unpatched exploits. Whoever runs the server, or any admin who can grant themselves a role, can read them, so one breach or insider leaks zero-days. Remove that unilateral access and a shared third-party disclosure channel becomes safe to use.
+
+### 3. Value & impact
+
+Researchers can report to vendors they have never met without handing exploits to a platform operator. Example: Linh finds a flaw in Kettle Health's patient portal; only Kettle's analysts hold a read grant for that report.
+
+### 4. Why TideCloak matters
+
+Reports are encrypted in the browser under a signed Tide relationship policy; key material is split across Tide's ORK network, not held by our server. Identity and access changes go through TideCloak governance: in our live realm, changing the app's client required an approval signed in the Tide enclave before it took effect. Without Tide, our server would hold the keys, which is the exact problem.
+
+### 5. Prototype & storytelling
+
+The video shows a real Tide-enclave login (DPoP-bound) into the app as the researcher, and governed change requests being authorised in TideCloak. Encryption and vendor decryption are implemented but not shown live: on 22 Oct a Tide network outage (16 of 20 ORKs unreachable) blocked enrolling the vendor account.
+
+## Setup and technical notes
+
+This repository is a runnable implementation, not a certification. Verified live on
+22 Oct 2026: realm provisioning, enclave enrolment, DPoP-bound login into the app,
+and enclave-signed approval of client changes. Not yet verified live: policy
+signing, encryption, vendor decryption, and the one-admin replacement-policy
+negative test. Those gates require the setup in
 [Live Tide setup](#live-tide-setup) and the negative tests in the design docs.
 
 ## Stack
@@ -71,8 +95,16 @@ an allowlisted public adapter; private fields and private JWKs cause
 
    Create the realm and a public client. Register web origin
    `http://localhost:5137` and callback `http://localhost:5137/auth/redirect`.
-   Configure the access-token audience to match `EMBARGO_AUDIENCE`
-   (default `embargo-api`).
+   Set `EMBARGO_AUDIENCE` to the client id (`embargo-web`) and use a client
+   audience mapper. Tide ORKs refuse to sign session tokens that carry a custom
+   (non-client) audience. The client must have `dpop.bound.access.tokens=true`;
+   the frontend enables `useDPoP` and Vite serves the SDK's
+   `/tide_dpop/...` relay page (`@tidecloak/js/vite`).
+
+   Chrome's Local Network Access check blocks the Tide enclave
+   (`https://ork*.tideprotocol.com`) from calling `localhost:8080` during
+   enrolment ("Network request failed"). Allow the local-network prompt, or
+   disable `chrome://flags/#local-network-access-check` for local testing.
 2. **Adapter.** Download the client adapter from the TideCloak console to
    `config/tidecloak.json` (or point `TIDE_ADAPTER_PATH` at it). Never place it in
    `public/`, `dist/` or any other served directory. It must include `realm`,
@@ -90,7 +122,7 @@ an allowlisted public adapter; private fields and private JWKs cause
 
    ```sh
    APP_ORIGIN=http://localhost:5137
-   EMBARGO_AUDIENCE=embargo-api
+   EMBARGO_AUDIENCE=embargo-web
    TIDE_ADAPTER_PATH=config/tidecloak.json
    TIDE_CSP_ORIGINS=
    EMBARGO_DB_PATH=data/embargo.sqlite
@@ -232,5 +264,6 @@ one-admin/two-admin replacement-policy scenario. Those remain open gates.
 - A compromised endpoint, malicious frontend deployment, authorised recipient
   copying plaintext, or a colluding admin quorum is outside the claim.
 - SQLite state and the activity table are not tamper-proof against their operator.
-- DPoP is not enabled; bearer replay is not prevented by this server.
+- Tokens are DPoP-bound by TideCloak, but this API checks only the bearer token,
+  not the DPoP proof, so replay against this API is not prevented.
 - The CSP and origin checks were not validated against a live Tide enclave.

@@ -10,8 +10,10 @@
 DEMO_USERS=(
   "linh:Linh:Researcher:researcher,_tide_encryptor"
   "sam:Sam:Kettle Health:vendor-kettle,_tide_decryptor"
-  "jo:Jo:Acme Bank:vendor-acme,_tide_decryptor"
 )
+# The free Tide tier allows 5 linked accounts per realm, and a failed enclave
+# signup still uses one. Add the wrong-vendor control only when there is room:
+#   "jo-acme:Jo:Acme Bank:vendor-acme,_tide_decryptor"   (usernames need >= 3 chars)
 ADMIN_EXTRA_ROLES="operator"
 INVITES_FILE="${PROJECT_ROOT}/tide-invites.txt"
 

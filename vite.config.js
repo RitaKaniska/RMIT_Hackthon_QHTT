@@ -1,7 +1,20 @@
-import { rmSync } from "node:fs";
+import { readFileSync, rmSync } from "node:fs";
 import { resolve } from "node:path";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import { tideDpopPlugin } from "@tidecloak/js/vite";
+
+// The Tide enclave frames /tide_dpop/iss/<hex>/aud/<hex>/tide_dpop_auth.html on
+// this origin to bind the session to the app's DPoP key. Only the issuer and
+// client are read from the adapter, to check that path.
+function dpopExpectations() {
+  try {
+    const adapter = JSON.parse(readFileSync(resolve(process.env.TIDE_ADAPTER_PATH || "config/tidecloak.json"), "utf8"));
+    return { realm: adapter.realm, "auth-server-url": adapter["auth-server-url"], resource: adapter.resource };
+  } catch {
+    return {};
+  }
+}
 
 const DENIED_DEV_PATHS = [
   /^\/(?:tidecloak|adapter)\.json$/i,
@@ -50,7 +63,7 @@ function denyRuntimeAssets() {
 }
 
 export default defineConfig({
-  plugins: [react(), denyRuntimeAssets()],
+  plugins: [react(), denyRuntimeAssets(), tideDpopPlugin({ config: dpopExpectations() })],
   server: {
     host: "localhost",
     port: 5137,
